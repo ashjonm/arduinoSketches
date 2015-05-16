@@ -1,7 +1,7 @@
 int led = 10;
 int rLed = 7;
-int bLed = 8;
-int gLed = 9;
+int bLed = 6;
+int gLed = 5;
 
 void setup() {
   pinMode(led, OUTPUT);

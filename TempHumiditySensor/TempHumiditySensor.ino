@@ -1,6 +1,4 @@
 #include <DHT22.h>
-// Only used for sprintf
-#include <stdio.h>
 
 // Data wire is plugged into port 7 on the Arduino
 // Connect a 4.7K resistor between VCC and the data pin (strong pullup)
