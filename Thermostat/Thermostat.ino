@@ -20,12 +20,12 @@ void setup() {
   pinMode(gLed, OUTPUT);
 
   dht.begin();
+  
+  // Allow the sensor to stablize. 
+  flicker(HVAC, 50, 20);
 }
 
 void loop() {
-  // Allow the sensor to stablize. 
-  flicker(HVAC, 50, 20);
-  
   float h = dht.readHumidity();
   float t = dht.readTemperature(true);
   float i = dht.computeHeatIndex(t,h);
