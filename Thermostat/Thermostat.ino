@@ -1,23 +1,81 @@
-int led = 10;
+#include "DHT.h"
+
+#define DHTPIN 13
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN,DHTTYPE);
+
+int HVAC = 10;
 int rLed = 7;
-int bLed = 6;
-int gLed = 5;
+int gLed = 8;
+int bLed = 9;
 
 void setup() {
-  pinMode(led, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Thermostat v0.1.0");
+  
+  pinMode(HVAC, OUTPUT);
   pinMode(rLed, OUTPUT);
   pinMode(bLed, OUTPUT);
   pinMode(gLed, OUTPUT);
+
+  dht.begin();
 }
 
 void loop() {
-  for (int i = 1; i<8; i++) {
-    flicker(led, 75, 7);
-    dualColorLed(i);
-    delay(8000);
-    dualColorLed(0);
-    flicker(led, 1000, 5);
+  // Allow the sensor to stablize. 
+  flicker(HVAC, 50, 20);
+  
+  float h = dht.readHumidity();
+  float t = dht.readTemperature(true);
+  float i = dht.computeHeatIndex(t,h);
+  int s = (int) (i - 50)/10;
+  
+  if (isnan(h) || isnan(t)) {
+    Serial.println("Failed to read from sensor!");
+    return;
   }
+  
+  printData(h,t,i,s);
+  
+  runHVAC(h,t);
+
+  showHeatIndex(s);
+}
+
+void printData(float h, float t, float i, int s) {
+  Serial.print("Humidity: ");
+  Serial.print(h);
+  Serial.print("%\t");
+  Serial.print("Temperature: ");
+  Serial.print(t);
+  Serial.print("*F\t");
+  Serial.print("Index: ");
+  Serial.print(i);
+  Serial.print("*F\t");
+  Serial.print("State: ");
+  Serial.println(s);
+}
+
+void runHVAC (float h, float t) {
+  if ( h > 80 || t > 80) {
+    turnOn(HVAC);
+  }
+  else {
+    turnOff(HVAC);
+  }
+}
+
+void turnOn (int device) {
+  digitalWrite(device, HIGH);
+}
+
+void turnOff (int device) {
+  digitalWrite(device, LOW);
+}
+
+void showHeatIndex(int s) {
+  triColorLed(s);
 }
 
 void flicker(int device, int timeOn, int loops) {
@@ -37,7 +95,7 @@ void ledOff(int device, int timeOff) {
   delay(timeOff);
 }
 
-void dualColorLed(int state) {
+void triColorLed(int state) {
   switch (state) {
     case 0:
       digitalWrite(rLed, LOW);
@@ -80,4 +138,4 @@ void dualColorLed(int state) {
       digitalWrite(gLed, HIGH);
       break;
   }
-} 
+}
